@@ -70,9 +70,7 @@ Cloud9 도메인에 대해 광고 차단기, 자바스크립트 비활성화기 
 ## Cloud9 시작:
 Cloud9 환경 생성: https://us-east-1.console.aws.amazon.com/cloud9/home?region=us-east-1
 
-```
 Cloud9 환경의 이름을 지정하고 있는지 확인하십시오. Docker-Workshop, 그렇지 않으면 나중에 문제가 발생합니다.
-```
 
 1. 환경 만들기 선택
 2. 이름을 Docker-Workshop으로 지정 하고 다음 단계를 클릭합니다.
@@ -96,9 +94,7 @@ Cloud9 환경의 이름을 지정하고 있는지 확인하십시오. Docker-Wor
 
 # 작업 공간에 대한 IAM 역할 생성
 
-```
 여기서부터 아래와 같이 입력해야 하는 명령어가 보이면 Cloud9 IDE에 이러한 명령어를 입력하게 됩니다. 당신이 사용할 수있는 클립 보드에 복사를 단순히 복사 Cloud9에 붙여 넣기 기능 (오른쪽 상단 모서리). 붙여넣으려면 Windows의 경우 Ctrl + V 또는 Mac의 경우 Command + V를 사용할 수 있습니다.
-```
 
 1. [이 링크를 사용하여 관리자 액세스 권한이 있는 IAM 역할을 생성합니다](https://console.aws.amazon.com/iam/home#/roles$new?step=review&commonUseCase=EC2%2BEC2&selectedUseCase=EC2&policies=arn:aws:iam::aws:policy%2FAdministratorAccess).
 
@@ -126,9 +122,7 @@ Cloud9 환경의 이름을 지정하고 있는지 확인하십시오. Docker-Wor
 
 ## Docker Workshop을 위한 작업 공간 구성
 
-```
 Cloud9은 일반적으로 IAM 자격 증명을 동적으로 관리합니다. 그러나 이 워크샵의 목적을 위해 임시 토큰이 환경 변수에 있어야 합니다.
-```
 
 1. 작업 공간으로 돌아가서 오른쪽 상단 모서리에 있는 톱니바퀴 아이콘을 클릭하거나 새 탭을 열려면 클릭하고 "기본 설정 열기"를 선택하십시오.
 
@@ -155,9 +149,7 @@ Cloud9은 일반적으로 IAM 자격 증명을 동적으로 관리합니다. 그
 
 # 도커 계정 생성
 
-```
 Docker ID가 이미 있는 경우 이 섹션을 건너뛸 수 있습니다.
-```
 
 1. [이 단계](https://dockr.ly/31uSAeb)에서 자신을 위한 Docker ID를 생성합니다. "Docker ID 등록" 섹션만 수행하면 됩니다.
 
