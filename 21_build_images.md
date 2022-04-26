@@ -1,4 +1,4 @@
-# DOCKER BUILDKIT 및 COMPOSE로 컨테이너 이미지 빌드
+# DOCKER BUILDKIT 및 COMPOSE를 사용하여 컨테이너 이미지 빌드
 예상 완료 시간: 30분 - 1시간
 
 ## 소개

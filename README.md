@@ -19,8 +19,19 @@ AWS Fargate를 사용하는 서버리스 컨테이너
 
 ## 이 워크숍은 누가 수강해야 하나요?
 
-개발자
-DevOps 엔지니어
-솔루션 아키텍트
-사이트 안정성 엔지니어(SRE)
-컨테이너를 사랑하고 더 배우고 싶은 사람!
+- 개발자  
+- DevOps 엔지니어  
+- 솔루션 아키텍트  
+- 사이트 안정성 엔지니어(SRE)  
+- 컨테이너를 사랑하고 더 배우고 싶은 사람!  
+
+## 순서
+- [워크샵 개요](./0_introduction.md)
+
+- [전제 조건](./10_prerequisites.md)
+
+- [DOCKER BUILDKIT 및 COMPOSE를 사용하여 컨테이너 이미지 빌드](./21_build_images.md)
+
+- [DOCKER AMAZON ECS 플러그인을 사용하여 AWS에 애플리케이션 배포](./31_docker_ecs_integration.md)
+
+- [CODEBUILD, CODEPIPELINE 및 DOCKER COMPOSE가 포함된 CI/CD](./41_codepipeline.md)
