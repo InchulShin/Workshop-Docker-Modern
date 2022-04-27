@@ -3,21 +3,18 @@
 # 시작하기
 워크샵을 시작하려면 다음 중 하나를 수행하십시오.
 
+<!--
 # AWS 이벤트
 이 워크샵을 완료하려면 AWS Event Engine 서비스를 통해 AWS 계정이 제공됩니다. 이벤트 직원이 팀 해시를 제공합니다.
 
-```
-현재 AWS 계정에 로그인되어 있는 경우 다음을 사용하여 로그아웃할 수 있습니다. 링크
-```
+현재 AWS 계정에 로그인되어 있는 경우 다음을 사용하여 로그아웃할 수 있습니다. [Link](https://console.aws.amazon.com/console/)
 
 ## AWS 계정 생성
 1. 버튼을 클릭하거나 검색하여 포털에 연결합니다.https://dashboard.eventengine.run/. 다음 화면이 나타납니다. 텍스트 상자에 제공된 해시를 입력합니다. 오른쪽 하단에 있는 버튼이 약관 동의 및 로그인 으로 변경됩니다 . 계속하려면 해당 버튼을 클릭하십시오.
 
 ![](./images/event-engine-initial-screen.png)
 
-```
 이벤트 엔진 탭을 열어 둡니다(다음 단계에서 새 탭이 사용됨).
-```
 
 2. AWS 콘솔 을 선택한 다음 AWS 콘솔 열기 를 선택합니다 .
 
@@ -29,13 +26,11 @@
 
 ![](./images/event-engine-region.png)
 
-```
 이 계정은 워크샵이 끝나면 만료되며 생성된 모든 리소스는 자동으로 프로비저닝 해제됩니다. 오늘 이후에는 이 계정에 액세스할 수 없습니다.
-```
 
 ## 워크샵을 직접 운영
 워크샵을 직접 운영하는 경우에만 이 섹션을 완료하십시오. AWS에서 주최하는 이벤트(예: re:Invent, Kubecon, Immersion Day 등)에 있는 경우 다음으로 이동하십시오.AWS 이벤트에서 워크숍 시작.
-
+-->
 ## AWS 계정 생성
 계정에 새 IAM 역할을 생성하고 다른 IAM 권한의 범위를 지정할 수 있는 기능이 있어야 합니다.
 
@@ -68,7 +63,7 @@ Cloud9 작업 공간은 루트 계정 사용자가 아닌 관리자 권한이 �
 Cloud9 도메인에 대해 광고 차단기, 자바스크립트 비활성화기 및 추적 차단기를 비활성화해야 합니다. 그렇지 않으면 작업 공간에 연결하는 데 영향을 받을 수 있습니다. Cloud9에는 타사 쿠키가 필요합니다. 당신은 화이트리스트에특정 도메인.
 
 ## Cloud9 시작:
-Cloud9 환경 생성: https://us-east-1.console.aws.amazon.com/cloud9/home?region=us-east-1
+Cloud9 환경 생성: https://console.aws.amazon.com/cloud9
 
 Cloud9 환경의 이름을 지정하고 있는지 확인하십시오. Docker-Workshop, 그렇지 않으면 나중에 문제가 발생합니다.
 
@@ -76,9 +71,9 @@ Cloud9 환경의 이름을 지정하고 있는지 확인하십시오. Docker-Wor
 2. 이름을 Docker-Workshop으로 지정 하고 다음 단계를 클릭합니다.
 3. 구성에 다음 표를 사용하십시오.
 
-| 환경 설정 | 값 |
-| ------- | - |
-| 환경 유형 | 우분투 서버 18.04 LTS |
+| 환경 설정 | 값   |
+| ------- | --- |
+| 환경 유형 | 우분투 서버 18.04 LTS <br> Amazon Linux 2 |
 | 인스턴스 유형 | t3.large |
 | 플랫폼 | (기본값으로 두십시오) |
 | 비용 절감 설정 | (기본값으로 두십시오) |
@@ -134,10 +129,25 @@ Cloud9은 일반적으로 IAM 자격 증명을 동적으로 관리합니다. 그
 
 4. 아래 명령을 복사하여 실행( Ctrl+P 로 붙여넣기 )하십시오. 그것을 실행하기 전에 주석을 읽고 그것이 하는 일을 검토하십시오.
 
-```
+Ubuntu 18.04 LTS
+```ubuntu
   sudo pip install --upgrade awscli && hash -r
   sudo apt update
   sudo apt install jq gettext bash-completion moreutils -y
+  rm -vf ${HOME}/.aws/credentials
+  export ACCOUNT_ID=$(aws sts get-caller-identity --output text --query Account)
+  export STS_RESPONSE=$(aws sts assume-role --role-arn arn:aws:iam::${ACCOUNT_ID}:role/Docker-Workshop-Admin --role-session-name $(uuidgen) --duration-seconds 3600)
+  export AWS_ACCESS_KEY_ID=$(echo $STS_RESPONSE | jq .Credentials.AccessKeyId | tr -d \")
+  export AWS_SECRET_ACCESS_KEY=$(echo $STS_RESPONSE | jq .Credentials.SecretAccessKey | tr -d \")
+  export AWS_SESSION_TOKEN=$(echo $STS_RESPONSE | jq .Credentials.SessionToken | tr -d \")
+  export AWS_DEFAULT_REGION=us-east-1
+```
+
+Amazon Linux 2
+```Amazon Linux 2
+  sudo pip install --upgrade awscli && hash -r
+  sudo yum update -y
+  sudo yum install jq gettext bash-completion moreutils -y
   rm -vf ${HOME}/.aws/credentials
   export ACCOUNT_ID=$(aws sts get-caller-identity --output text --query Account)
   export STS_RESPONSE=$(aws sts assume-role --role-arn arn:aws:iam::${ACCOUNT_ID}:role/Docker-Workshop-Admin --role-session-name $(uuidgen) --duration-seconds 3600)
@@ -160,8 +170,23 @@ Cloud9 환경에는 이 워크샵에 필요한 기능이 없는 Docker 버전이
 
 1. Cloud9에서 터미널을 열고 다음을 실행합니다.
 
+Ubuntu
+```ubuntu
+sudo apt install jq -y
+curl -L -o docker-linux-amd64.tar.gz https://github.com/docker/compose-cli/releases/download/v1.0.10/docker-linux-amd64.tar.gz
+tar xzf docker-linux-amd64.tar.gz
+chmod +x docker/docker
+which docker
+sudo ln -s $(which docker) /usr/local/bin/com.docker.cli
+./docker/docker --context default ps
+sudo mv docker/docker /usr/local/bin/docker
+docker version
+docker compose
 ```
-sudo apt  install jq -y
+
+Amazin Linux 2
+```Amazon Linux 2
+sudo yum install jq -y
 curl -L -o docker-linux-amd64.tar.gz https://github.com/docker/compose-cli/releases/download/v1.0.10/docker-linux-amd64.tar.gz
 tar xzf docker-linux-amd64.tar.gz
 chmod +x docker/docker
