@@ -1,15 +1,10 @@
 # AWS 및 DOCKER를 사용한 애플리케이션 현대화
-<<<<<<< HEAD
+
 <!--
 [원본](https://docker.awsworkshop.io/)
 -->
+
 ![](./images/docker-cloud-twitter-card.png)
-=======
-
-[원본](https://docker.awsworkshop.io)
-
-![](images/docker-cloud-twitter-card.png)
->>>>>>> 76c94801881488de4d3065cb373023107b35de87
 
 어서 오십시오!
 
