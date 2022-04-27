@@ -1,20 +1,22 @@
 # DOCKER AMAZON ECS 플러그인을 사용하여 AWS에 애플리케이션 배포
 
-## 학습 목표
+## DOCKER AMAZON ECS 플러그인을 사용하여 AWS에 애플리케이션 배포
+
+### 학습 목표
+
 이제 애플리케이션이 로컬에서 실행되고 있으므로 개발자 환경을 수정하고 동일한 애플리케이션을 사용하지 않고 동일한 애플리케이션을 AWS로 원활하게 마이그레이션하는 방법을 살펴보겠습니다. docker compose명령. 계속 진행하기 전에 Docker Compose용 ECS 플러그인을 활용하는 데 필요한 몇 가지 단계에 대해 이야기하겠습니다.
 
-## 도커 컨텍스트란 무엇입니까?
+### 도커 컨텍스트란 무엇입니까?
+
 단일 Docker CLI는 여러 컨텍스트를 가질 수 있습니다 . 각 컨텍스트에는 다른 클러스터 또는 노드를 관리하는 데 필요한 모든 엔드포인트 및 보안 정보가 포함됩니다. docker 컨텍스트 명령을 사용하면 이러한 컨텍스트를 쉽게 구성하고 컨텍스트 간에 전환할 수 있습니다. 예를 들어 회사 랩톱의 단일 Docker 클라이언트는 두 가지 컨텍스트로 구성될 수 있습니다. dev-k8s 및 prod-swarm. dev-k8s에는 개발 환경에서 Kubernetes 클러스터를 구성 및 관리하기 위한 엔드포인트 데이터 및 보안 자격 증명이 포함되어 있습니다. prod-swarm에는 프로덕션 환경에서 Swarm 클러스터를 관리하는 데 필요한 모든 것이 포함되어 있습니다. 이러한 컨텍스트가 구성되면 최상위 도커 컨텍스트 사용을 사용할 수 있습니다. 쉽게 전환할 수 있습니다.
 
 컨텍스트를 이해하는 것이 중요한 또 다른 이유는 ECS에 특정 구성 및 엔드포인트가 포함되어 있으므로 애플리케이션을 ECS에 배포할 수 있도록 특별히 Amazon ECS에 대한 컨텍스트를 생성해야 하기 때문입니다.
 
-### Amazon ECS용 Docker 컨텍스트 생성
+#### Amazon ECS용 Docker 컨텍스트 생성
+
 컨텍스트는 여러 속성의 조합입니다. 여기에는 다음이 포함됩니다.
 
-이름
-엔드포인트 구성
-TLS 정보
-오케스트레이터
+이름 엔드포인트 구성 TLS 정보 오케스트레이터
 
 먼저 로컬 머신에 어떤 컨텍스트가 있는지 살펴보겠습니다. 컨텍스트 목록을 보려면 다음 명령을 실행하십시오.
 
@@ -24,7 +26,7 @@ NAME                TYPE                DESCRIPTION                             
 default *           moby                Current DOCKER_HOST based configuration   unix:///var/run/docker.sock   https://kubernetes.docker.internal:6443 (default)   swarm
 ```
 
-NS docker context ls명령은 현재 로컬 시스템에 구성된 컨텍스트 목록을 인쇄합니다. 당신은 알아 차릴 것입니다default컨텍스트가 *옆에 있습니다. 이는 모든 Docker 명령이 사용할 현재 컨텍스트임을 나타냅니다.
+NS docker context ls명령은 현재 로컬 시스템에 구성된 컨텍스트 목록을 인쇄합니다. 당신은 알아 차릴 것입니다default컨텍스트가 \*옆에 있습니다. 이는 모든 Docker 명령이 사용할 현재 컨텍스트임을 나타냅니다.
 
 이제 ECS를 대상으로 하는 데 사용할 수 있는 컨텍스트를 생성하겠습니다. 이렇게 하려면 다음을 사용합니다.docker context create 명령.
 
@@ -75,11 +77,14 @@ ecs-workshop *      ecs                 (us-east-1)
 
 이제 us-east-1의 AWS ECS 서비스를 가리키는 도커 컨텍스트가 있습니다. 지금까지 우리는 아직 ECS에 아무 것도 배포하지 않았습니다.
 
-## docker 명령을 사용하여 AWS Secrets Manager에서 보안 암호 생성
-### AWS Secrets Manager란 무엇입니까?
+### docker 명령을 사용하여 AWS Secrets Manager에서 보안 암호 생성
+
+#### AWS Secrets Manager란 무엇입니까?
+
 AWS Secrets Manager Secrets Manager를 사용하면 암호를 포함하여 코드에서 하드코딩된 자격 증명을 Secrets Manager에 대한 API 호출로 교체하여 프로그래밍 방식으로 암호를 검색할 수 있습니다. 이렇게 하면 암호가 더 이상 코드에 존재하지 않기 때문에 다른 사람이 코드를 검사하는 것에 의해 암호가 손상되지 않도록 하는 데 도움이 됩니다. 또한 지정된 일정에 따라 암호를 자동으로 교체하도록 Secrets Manager를 구성할 수 있습니다. 이를 통해 장기 비밀을 단기 비밀로 교체할 수 있으므로 손상 위험이 크게 줄어듭니다. 여기에는 이 워크샵의 뒷부분에서 사용할 API 키와 OAuth 토큰이 포함됩니다.
 
-### Docker Hub 자격 증명을 사용하여 AWS Secrets Manager에서 보안 암호 생성
+#### Docker Hub 자격 증명을 사용하여 AWS Secrets Manager에서 보안 암호 생성
+
 라는 이름의 파일 생성 docker-pull-creds.json그리고 그것에 다음을 추가하십시오. Amazon ECS는 이 토큰을 사용하여 Docker Hub에서 이미지를 검색합니다.
 
 ```
@@ -100,15 +105,18 @@ echo $DOCKER_PULL_SECRETS_MANAGER
 
 다음 섹션에서는 애플리케이션을 Amazon ECS에 배포합니다.
 
-# 1단계: 애플리케이션을 AWS ECS로 마이그레이션
-## DOCKER COMPOSE를 사용하여 AWS ECS에 샘플 애플리케이션 배포
+## 1단계: 애플리케이션을 AWS ECS로 마이그레이션
 
-### 학습 목표
-이 모듈에서는 모듈 1에서 구축한 애플리케이션을 Amazon ECS에 배포합니다. 우리는 같은 것을 사용할 것입니다docker compose명령(개발자 경험을 수정하지 않음). 우리는 기본값을 오버레이합니다docker-compose.yaml ~와 함께 docker-compose.prod.migrate.yaml. Compose 파일 오버레이를 사용하여 특정 환경 배포에 대해 수정해야 하는 항목만 수정합니다.
+### DOCKER COMPOSE를 사용하여 AWS ECS에 샘플 애플리케이션 배포
+
+#### 학습 목표
+
+이 모듈에서는 모듈 1에서 구축한 애플리케이션을 Amazon ECS에 배포합니다. 우리는 같은 것을 사용할 것입니다docker compose명령(개발자 경험을 수정하지 않음). 우리는 기본값을 오버레이합니다docker-compose.yaml \~와 함께 docker-compose.prod.migrate.yaml. Compose 파일 오버레이를 사용하여 특정 환경 배포에 대해 수정해야 하는 항목만 수정합니다.
 
 예를 들어 Module-2에서는 다음을 사용하여 로컬에서 이미지를 구축했습니다. docker compose build 그러나 AWS에 배포하려는 경우 컨테이너 리포지토리에 게시된 이미지를 사용하고 이미지를 ECS로 가져오려고 합니다.
 
-### 오버레이 파일 검사
+#### 오버레이 파일 검사
+
 열려있는 docker-compose.prod.migrate.yaml 내용을 확인하기 위해
 
 ```
@@ -117,12 +125,13 @@ cat  docker-compose.prod.migrate.yaml
 
 다음 사항에 유의하십시오.
 
-| 속성 작성 | 목적 |
-| ------- | --- |
-| 서비스.프론트엔드.이미지 | dockerhub에 푸시한 이미지입니다. compose 파일은 이전 모듈에서 설정한 환경 변수를 선택합니다. |
-| services.frontend.x-aws-pull_credentials | 안전하게 저장된 dockerhub에서 이미지를 가져오기 위한 자격 증명 AWS 비밀 관리자 우리가 준비에 밀어 넣은 |
+| 속성 작성                                     | 목적                                                               |
+| ----------------------------------------- | ---------------------------------------------------------------- |
+| 서비스.프론트엔드.이미지                             | dockerhub에 푸시한 이미지입니다. compose 파일은 이전 모듈에서 설정한 환경 변수를 선택합니다.     |
+| services.frontend.x-aws-pull\_credentials | 안전하게 저장된 dockerhub에서 이미지를 가져오기 위한 자격 증명 AWS 비밀 관리자 우리가 준비에 밀어 넣은 |
 
-## Amazon ECS에 배포
+### Amazon ECS에 배포
+
 같은 것을 사용 docker compose up Amazon ECS에 배포하는 명령
 
 ```
@@ -197,27 +206,27 @@ cat aws-cloudformation.yaml
 
 생성된 AWS Cloudformation 템플릿은 aws-cloudformation.yaml 우리가 코딩한 적이 없는 약 650개 이상의 코드 라인이 있지만 로컬 개발에 사용한 것과 동일한 작성 파일이 ECS 컨텍스트에서 생성되어 일관된 개발자 경험을 유지합니다.
 
-다음에서 전체 CloudFormation 스택을 볼 수 있습니다. https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringStatus=active&filteringText=&viewNested=true&hideStacks=false
+다음에서 전체 CloudFormation 스택을 볼 수 있습니다. https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringStatus=active\&filteringText=\&viewNested=true\&hideStacks=false
 
-![](./images/running-in-cloud.png)
+![](../images/running-in-cloud.png)
 
 다음은 compose CLI에서 생성된 해당 AWS 리소스입니다.
 
-| 현지 | 생성된 AWS 리소스 | 목적 | 추가 정보 |
-| --- | -------------- | --- | ------ |
-| 도커 볼륨 | AWS 탄력적 파일 시스템 | 상태 저장 스토리지 | https://docs.docker.com/cloud/ecs-integration/#volumes |
-| 도커 네트워크 | 보안 그룹 | 서비스 격리 | https://docs.docker.com/cloud/ecs-integration/#service-isolation |
-| 도커 비밀 | AWS 비밀 관리자 | 보안 비밀 저장소 | https://docs.docker.com/cloud/ecs-integration/#secrets |
-| 도커 서비스 | 아마존 ECS 서비스 그리고 로드 밸런서 | |
-| Compose의 네트워킹 | AWS 클라우드맵 | 서비스 발견	https://docs.docker.com/cloud/ecs-integration/#service-discovery |
+| 현지            | 생성된 AWS 리소스            | 목적                                                                      | 추가 정보                                                            |
+| ------------- | ---------------------- | ----------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 도커 볼륨         | AWS 탄력적 파일 시스템         | 상태 저장 스토리지                                                              | https://docs.docker.com/cloud/ecs-integration/#volumes           |
+| 도커 네트워크       | 보안 그룹                  | 서비스 격리                                                                  | https://docs.docker.com/cloud/ecs-integration/#service-isolation |
+| 도커 비밀         | AWS 비밀 관리자             | 보안 비밀 저장소                                                               | https://docs.docker.com/cloud/ecs-integration/#secrets           |
+| 도커 서비스        | 아마존 ECS 서비스 그리고 로드 밸런서 |                                                                         |                                                                  |
+| Compose의 네트워킹 | AWS 클라우드맵              | 서비스 발견 https://docs.docker.com/cloud/ecs-integration/#service-discovery |                                                                  |
 
 로컬과 비교할 때 AWS에서 애플리케이션이 어떻게 보이는지 시각화하려면
 
-![](./images/running-in-cloud-mapping.png)
+![](../images/running-in-cloud-mapping.png)
 
 아래는 aws의 애플리케이션 아키텍처입니다.
 
-![](./images/application-on-aws.png)
+![](../images/application-on-aws.png)
 
 운영 docker compose psAWS에서 생성된 관련 서비스 목록을 보려면 . 프런트엔드의 로드 밸런서 URL을 기록해 둡니다.
 
@@ -262,21 +271,24 @@ Backend_Secrets_InitContainer  | 172.31.55.66 - - [15/Mar/2021 22:38:18] "GET / 
 frontend                       | 172.31.58.77 - - [15/Mar/2021:22:38:18 +0000] "GET / HTTP/1.1" 200 26 "-" "ELB-HealthChecker/2.0" "-"
 ```
 
-# 2단계: ECS에서 현대화
-# DOCKER COMPOSE를 사용하여 샘플 애플리케이션을 AWS ECS로 현대화
+## 2단계: ECS에서 현대화
 
-## 학습 목표
+## DOCKER COMPOSE를 사용하여 샘플 애플리케이션을 AWS ECS로 현대화
+
+### 학습 목표
+
 이제 애플리케이션을 AWS로 마이그레이션하고 AWS에서 성공적으로 실행했으므로 동일한 docker compose 명령줄 인터페이스를 사용하여 개발자 환경을 수정하지 않고 다시 한 걸음 더 나아가 현대화를 시작하겠습니다. 전체 목록 및 Docker Compose-ECS 매핑은 다음을 참조하십시오.여기 그리고 예
 
 이 단계에서는 다음을 수행합니다.
 
-AWS Fargate 작업에 대해 AutoScaling 활성화
-컨테이너 대신 AWS RDS(관계형 데이터베이스 시스템)에서 호스팅되는 MQSQL 데이터베이스를 사용합니다.
+AWS Fargate 작업에 대해 AutoScaling 활성화 컨테이너 대신 AWS RDS(관계형 데이터베이스 시스템)에서 호스팅되는 MQSQL 데이터베이스를 사용합니다.
 
-## AWS Fargate란 무엇입니까?
+### AWS Fargate란 무엇입니까?
+
 AWS Fargate는 Amazon Elastic Container Service(ECS) 및 Amazon Elastic Kubernetes Service(EKS)와 함께 작동하는 컨테이너용 서버리스 컴퓨팅 엔진입니다. Fargate를 사용하면 애플리케이션 구축에 집중할 수 있습니다. Fargate를 사용하면 서버를 프로비저닝 및 관리할 필요가 없고, 애플리케이션별로 리소스를 지정하고 비용을 지불할 수 있으며, 설계에 따른 애플리케이션 격리를 통해 보안이 향상됩니다.
 
-## AWS Fargate 작업에 대해 Autoscaling 활성화
+### AWS Fargate 작업에 대해 Autoscaling 활성화
+
 검사 docker-compose.prod.scaling.yaml. 이 작성 파일은 나머지 두 개와 오버레이되면 다음을 수행합니다.
 
 services.backend.deploy.replicas를 사용하여 지정된 대로 백엔드 서비스에 대해 정적 복제본 수를 2로 늘립니다. 이것만으로는 서비스가 자동 확장되지 않습니다.
@@ -300,23 +312,25 @@ deploy:
       cpu: 75
 ```
 
-## 컨테이너 대신 AWS RDS(관계형 데이터베이스 시스템)에서 호스팅되는 MQSQL 데이터베이스 사용
+### 컨테이너 대신 AWS RDS(관계형 데이터베이스 시스템)에서 호스팅되는 MQSQL 데이터베이스 사용
+
 검사 x-aws-cloudformation 아래의 docker-compose.prod.scaling.yaml. x-aws-cloudformationAWS CloudFormation을 사용하여 AWS 리소스를 생성할 수 있는 docker compose용 사용자 지정 확장입니다. 우리의 경우 이 확장을 사용하여 다음 리소스를 생성합니다.
 
-| x-aws-cloudformation 속성 | 목적 |
-| ------------------------ | --- |
-| DB보안그룹 | 수신 규칙/CIDR 블록을 정의하는 보안 그룹입니다. 우리는 기본값을 지정하고 있습니다VPC CIDR 블록 |
-| RDSInstanceSecret | AWS Secrets Manager에 안전하게 저장된 RDS 데이터베이스에 연결하기 위한 사용자 이름과 암호를 생성합니다. |
-| MySQL | RDS MySQL 8.0.16 데이터베이스 생성 |
+| x-aws-cloudformation 속성 | 목적                                                                   |
+| ----------------------- | -------------------------------------------------------------------- |
+| DB보안그룹                  | 수신 규칙/CIDR 블록을 정의하는 보안 그룹입니다. 우리는 기본값을 지정하고 있습니다VPC CIDR 블록          |
+| RDSInstanceSecret       | AWS Secrets Manager에 안전하게 저장된 RDS 데이터베이스에 연결하기 위한 사용자 이름과 암호를 생성합니다. |
+| MySQL                   | RDS MySQL 8.0.16 데이터베이스 생성                                           |
 
-## 업데이트 시작
+### 업데이트 시작
+
 compose 속성을 추가 및 수정하고 AWS 리소스를 생성/업데이트하는 다음 명령을 실행합니다.
 
 ```
 DOCKER_HUB_ID=${DOCKER_HUB_ID} DOCKER_PULL_SECRETS_MANAGER=${DOCKER_PULL_SECRETS_MANAGER} docker compose -f docker-compose.yaml -f  docker-compose.prod.migrate.yaml -f docker-compose.prod.scaling.yaml up
 ```
 
-완료하는 데 약 10-15분이 소요됩니다. 에서 진행 상황을 볼 수 있습니다.https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringStatus=active&filteringText=&viewNested=true&hideStacks=false
+완료하는 데 약 10-15분이 소요됩니다. 에서 진행 상황을 볼 수 있습니다.https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringStatus=active\&filteringText=\&viewNested=true\&hideStacks=false
 
 ```
 DOCKER_HUB_ID=${DOCKER_HUB_ID} DOCKER_PULL_SECRETS_MANAGER=${DOCKER_PULL_SECRETS_MANAGER} docker compose -f docker-compose.yaml -f  docker-compose.prod.migrate.yaml -f docker-compose.prod.scaling.yaml up
@@ -361,8 +375,7 @@ WARNING services.restart: unsupported attribute
  ⠋ FrontendService                                CreateComplete       
 ```
 
-완료되면 다음으로 이동하십시오. https://console.aws.amazon.com/rds/home?region=us-east-1#databases:생성된 RDS 데이터베이스를 봅니다. RDS 끝점 및 포트를 기록해 둡니다.
-Secrets Manager로 이동하여 데이터베이스에 연결하기 위한 자격 증명을 검색합니다. https://console.aws.amazon.com/secretsmanager/home?region=us-east-1#!/secret?name=RDSInstanceSecret
+완료되면 다음으로 이동하십시오. https://console.aws.amazon.com/rds/home?region=us-east-1#databases:생성된 RDS 데이터베이스를 봅니다. RDS 끝점 및 포트를 기록해 둡니다. Secrets Manager로 이동하여 데이터베이스에 연결하기 위한 자격 증명을 검색합니다. https://console.aws.amazon.com/secretsmanager/home?region=us-east-1#!/secret?name=RDSInstanceSecret
 
 이 워크숍의 목적을 위해 AWS CloudFormation을 쿼리하고 RDS 데이터베이스 엔드포인트와 Secrets Manager ARN을 환경 변수로 설정하여 작성 파일에서 선택할 수 있도록 합니다.
 
@@ -379,12 +392,10 @@ DOCKER_HUB_ID=${DOCKER_HUB_ID} DOCKER_PULL_SECRETS_MANAGER=${DOCKER_PULL_SECRETS
 
 우리가 방금 무엇을 했습니까? cat docker-compose.prod.rds.yaml 파일을 검사하기 위해
 
-환경 변수에 RDS 데이터베이스 끝점을 설정하고 작성 파일에 전달했습니다.
-환경 변수에 AWS Secrets Manager 식별자(실제 암호가 아님)를 설정하고 작성 파일에 전달했습니다.
-docker compose가 자동으로 전달됨 비밀 에 지정된 docker-compose.prod.rds.yaml secrets.db-password.name 아래에 백엔드 애플리케이션에 마운트되어 애플리케이션이 컨테이너 대신 RDS 데이터베이스에 연결되도록 합니다.
-동일한 애플리케이션 엔드포인트를 실행할 수 있지만 대신 요청이 RDS 인스턴스로 이동하기 시작합니다.
+환경 변수에 RDS 데이터베이스 끝점을 설정하고 작성 파일에 전달했습니다. 환경 변수에 AWS Secrets Manager 식별자(실제 암호가 아님)를 설정하고 작성 파일에 전달했습니다. docker compose가 자동으로 전달됨 비밀 에 지정된 docker-compose.prod.rds.yaml secrets.db-password.name 아래에 백엔드 애플리케이션에 마운트되어 애플리케이션이 컨테이너 대신 RDS 데이터베이스에 연결되도록 합니다. 동일한 애플리케이션 엔드포인트를 실행할 수 있지만 대신 요청이 RDS 인스턴스로 이동하기 시작합니다.
 
-## 대청소
+### 대청소
+
 운영 docker compose down cloudformation 템플릿을 삭제하여 ECS 환경을 해체합니다.
 
 ```
